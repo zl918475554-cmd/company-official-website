@@ -147,7 +147,7 @@
                             </div>
                         </li>
                         <li>
-                            <el-dropdown  placement="top" hide-timeout="400" >
+                            <el-dropdown  placement="top" :hide-timeout="400" >
                                 <div 
                                     class="hue" 
                                     :class="{ 'search-highlight': isHighlighted('servicesupport'), 'ripple-effect': isRippled('servicesupport') }"
@@ -646,10 +646,11 @@ export default{
         }
     }
     
-    /* 波纹动画效果 */
+    /* 水面波纹扭曲效果 */
     .ripple-effect {
         position: relative;
         overflow: hidden;
+        isolation: isolate;
     }
     
     .ripple-effect::before {
@@ -660,22 +661,241 @@ export default{
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: rgba(64, 158, 255, 0.6);
         transform: translate(-50%, -50%);
-        animation: rippleExpand 0.6s ease-out forwards;
         pointer-events: none;
+        border: 2px solid rgba(64, 158, 255, 0.8);
+        box-shadow: 
+            0 0 0 0 rgba(64, 158, 255, 0),
+            0 0 0 0 rgba(103, 194, 58, 0),
+            0 0 0 0 rgba(64, 158, 255, 0),
+            0 0 0 0 rgba(103, 194, 58, 0),
+            inset 0 0 20px rgba(255, 255, 255, 0);
+        animation: waterRippleMultiRing 1.5s ease-out forwards;
+        z-index: 1;
     }
     
-    @keyframes rippleExpand {
+    .ripple-effect::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        background: radial-gradient(
+            circle,
+            rgba(64, 158, 255, 0.15) 0%,
+            rgba(64, 158, 255, 0.05) 30%,
+            transparent 60%
+        );
+        animation: waterRippleGlow 1.5s ease-out forwards;
+        animation-delay: 0.1s;
+        z-index: 0;
+    }
+    
+    @keyframes waterRippleMultiRing {
         0% {
             width: 0;
             height: 0;
+            opacity: 1;
+            box-shadow: 
+                0 0 0 0 rgba(64, 158, 255, 0.8),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                0 0 0 0 rgba(64, 158, 255, 0),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+            filter: blur(0px);
+        }
+        15% {
+            opacity: 0.95;
+            box-shadow: 
+                0 0 0 50px rgba(64, 158, 255, 0.6),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                0 0 0 0 rgba(64, 158, 255, 0),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                inset 0 0 20px rgba(255, 255, 255, 0.25);
+        }
+        30% {
+            opacity: 0.9;
+            box-shadow: 
+                0 0 0 80px rgba(64, 158, 255, 0.5),
+                0 0 0 60px rgba(103, 194, 58, 0.4),
+                0 0 0 0 rgba(64, 158, 255, 0),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+            filter: blur(0.5px);
+        }
+        45% {
+            opacity: 0.8;
+            box-shadow: 
+                0 0 0 110px rgba(64, 158, 255, 0.4),
+                0 0 0 90px rgba(103, 194, 58, 0.35),
+                0 0 0 70px rgba(64, 158, 255, 0.3),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                inset 0 0 20px rgba(255, 255, 255, 0.15);
+            filter: blur(1px);
+        }
+        60% {
             opacity: 0.6;
+            box-shadow: 
+                0 0 0 140px rgba(64, 158, 255, 0.3),
+                0 0 0 120px rgba(103, 194, 58, 0.25),
+                0 0 0 100px rgba(64, 158, 255, 0.2),
+                0 0 0 80px rgba(103, 194, 58, 0.15),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            filter: blur(2px);
+        }
+        75% {
+            opacity: 0.4;
+            filter: blur(3px);
         }
         100% {
-            width: 200px;
-            height: 200px;
+            width: 300px;
+            height: 300px;
             opacity: 0;
+            box-shadow: 
+                0 0 0 180px rgba(64, 158, 255, 0),
+                0 0 0 160px rgba(103, 194, 58, 0),
+                0 0 0 140px rgba(64, 158, 255, 0),
+                0 0 0 120px rgba(103, 194, 58, 0),
+                inset 0 0 20px rgba(255, 255, 255, 0);
+            filter: blur(4px);
+        }
+    }
+    
+    @keyframes waterRippleGlow {
+        0% {
+            width: 0;
+            height: 0;
+            opacity: 0.8;
+            transform: translate(-50%, -50%) scale(0.3);
+        }
+        50% {
+            opacity: 0.5;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+        100% {
+            width: 400px;
+            height: 400px;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+    }
+    
+    .ripple-effect {
+        animation: waterSurfaceDistortion 1.5s ease-out;
+    }
+    
+    @keyframes waterSurfaceDistortion {
+        0% {
+            text-shadow: 
+                0 0 0 rgba(64, 158, 255, 0),
+                0 0 0 rgba(103, 194, 58, 0);
+            transform: translate(0, 0) skewX(0deg) skewY(0deg);
+            filter: brightness(1) contrast(1);
+        }
+        10% {
+            text-shadow: 
+                1px 0 3px rgba(64, 158, 255, 0.6),
+                -1px 0 2px rgba(103, 194, 58, 0.4),
+                0 1px 2px rgba(255, 255, 255, 0.3);
+            transform: translate(0.5px, -0.5px) skewX(0.3deg) skewY(0.2deg);
+            filter: brightness(1.05) contrast(1.02);
+        }
+        20% {
+            text-shadow: 
+                -1px 0 4px rgba(64, 158, 255, 0.5),
+                1px 0 3px rgba(103, 194, 58, 0.45),
+                0 -1px 2px rgba(255, 255, 255, 0.25);
+            transform: translate(-0.5px, 0.5px) skewX(-0.3deg) skewY(-0.2deg);
+            filter: brightness(1.08) contrast(1.04);
+        }
+        30% {
+            text-shadow: 
+                0.5px 0 3px rgba(64, 158, 255, 0.4),
+                -0.5px 0 2px rgba(103, 194, 58, 0.35),
+                0 0.5px 1px rgba(255, 255, 255, 0.2);
+            transform: translate(0.3px, -0.3px) skewX(0.2deg) skewY(0.15deg);
+            filter: brightness(1.1) contrast(1.05);
+        }
+        40% {
+            text-shadow: 
+                -0.5px 0 2px rgba(64, 158, 255, 0.35),
+                0.5px 0 1.5px rgba(103, 194, 58, 0.3),
+                0 -0.5px 1px rgba(255, 255, 255, 0.15);
+            transform: translate(-0.3px, 0.3px) skewX(-0.2deg) skewY(-0.15deg);
+            filter: brightness(1.12) contrast(1.06);
+        }
+        50% {
+            text-shadow: 
+                0.3px 0 2px rgba(64, 158, 255, 0.3),
+                -0.3px 0 1.5px rgba(103, 194, 58, 0.25),
+                0 0.3px 0.8px rgba(255, 255, 255, 0.12);
+            transform: translate(0.2px, -0.2px) skewX(0.15deg) skewY(0.1deg);
+            filter: brightness(1.1) contrast(1.05);
+        }
+        60% {
+            text-shadow: 
+                -0.3px 0 1.5px rgba(64, 158, 255, 0.25),
+                0.3px 0 1px rgba(103, 194, 58, 0.2),
+                0 -0.3px 0.5px rgba(255, 255, 255, 0.1);
+            transform: translate(-0.2px, 0.2px) skewX(-0.15deg) skewY(-0.1deg);
+            filter: brightness(1.08) contrast(1.04);
+        }
+        70% {
+            text-shadow: 
+                0.2px 0 1px rgba(64, 158, 255, 0.2),
+                -0.2px 0 0.8px rgba(103, 194, 58, 0.15),
+                0 0.2px 0.3px rgba(255, 255, 255, 0.08);
+            transform: translate(0.1px, -0.1px) skewX(0.1deg) skewY(0.05deg);
+            filter: brightness(1.05) contrast(1.02);
+        }
+        80% {
+            text-shadow: 
+                -0.1px 0 0.5px rgba(64, 158, 255, 0.1),
+                0.1px 0 0.3px rgba(103, 194, 58, 0.08);
+            transform: translate(0, 0) skewX(0deg) skewY(0deg);
+            filter: brightness(1.02) contrast(1.01);
+        }
+        90% {
+            text-shadow: 
+                0 0 0 rgba(64, 158, 255, 0.05),
+                0 0 0 rgba(103, 194, 58, 0.05);
+            transform: translate(0, 0) skewX(0deg) skewY(0deg);
+            filter: brightness(1.01) contrast(1);
+        }
+        100% {
+            text-shadow: 
+                0 0 0 rgba(64, 158, 255, 0),
+                0 0 0 rgba(103, 194, 58, 0);
+            transform: translate(0, 0) skewX(0deg) skewY(0deg);
+            filter: brightness(1) contrast(1);
+        }
+    }
+    
+    .ripple-effect .hue,
+    .ripple-effect span,
+    .ripple-effect div {
+        animation: waterWaveShimmer 1.5s ease-out;
+    }
+    
+    @keyframes waterWaveShimmer {
+        0% {
+            filter: brightness(1) saturate(1);
+        }
+        25% {
+            filter: brightness(1.15) saturate(1.1);
+        }
+        50% {
+            filter: brightness(1.2) saturate(1.15);
+        }
+        75% {
+            filter: brightness(1.1) saturate(1.05);
+        }
+        100% {
+            filter: brightness(1) saturate(1);
         }
     }
     
