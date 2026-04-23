@@ -37,7 +37,7 @@ export const SearchState = {
         setTimeout(() => {
             this.rippleEffectId = null
             SearchBus.$emit('search:rippleEnded', id)
-        }, 600)
+        }, 1500)
     },
     
     clearAllHighlights() {
