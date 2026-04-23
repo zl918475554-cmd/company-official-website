@@ -19,6 +19,7 @@ export const SearchState = {
         
         if (items.length > 0) {
             this.setActiveHighlightId(items[0].id)
+            this.triggerRippleEffect(items[0].id)
         } else {
             this.clearAllHighlights()
         }

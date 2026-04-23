@@ -187,7 +187,7 @@
                         </li>
                         
                         <li class="search-box-container">
-                            <div class="search-wrapper">
+                            <div class="search-wrapper" ref="searchWrapper">
                                 <el-input
                                     v-model="searchKeyword"
                                     placeholder="搜索..."
@@ -201,7 +201,11 @@
                                 >
                                 </el-input>
                                 <transition name="fade">
-                                    <div v-if="searchResults.length > 0 && showSearchResults" class="search-results">
+                                    <div 
+                                        v-if="searchResults.length > 0 && showSearchResults" 
+                                        class="search-results"
+                                        :style="searchResultsStyle"
+                                    >
                                         <div 
                                             v-for="(item, index) in searchResults" 
                                             :key="item.id"
@@ -272,6 +276,19 @@ export default{
         SearchBus.$off('search:rippleTriggered')
         SearchBus.$off('search:rippleEnded')
         SearchBus.$off('search:clearAll')
+    },
+    computed: {
+        searchResultsStyle() {
+            if (this.$refs.searchWrapper) {
+                const rect = this.$refs.searchWrapper.getBoundingClientRect()
+                return {
+                    top: rect.bottom + 5 + 'px',
+                    left: rect.left + 'px',
+                    width: Math.max(250, rect.width) + 'px'
+                }
+            }
+            return {}
+        }
     },
     watch:{
         $route(to){
@@ -369,7 +386,10 @@ export default{
             this.navigateToResult(item)
         },
         hoverSearchResult(item) {
-            SearchState.setActiveHighlightId(item.id)
+            if (this.highlightedId !== item.id) {
+                SearchState.setActiveHighlightId(item.id)
+                SearchState.triggerRippleEffect(item.id)
+            }
         },
         navigateToResult(item) {
             const route = SearchState.navigateToMatchedItem(item)
@@ -395,7 +415,14 @@ export default{
         width: 100%;
         height: 80px;
         background-color: #b7c6d9;
-        overflow: hidden;
+        position: relative;
+        z-index: 100;
+    }
+    
+    .header::after {
+        content: '';
+        display: table;
+        clear: both;
     }
     /* logo */
     .el-header .header .logo img{
@@ -493,11 +520,12 @@ export default{
     
     /* 搜索框样式 */
     .search-box-container {
-        position: relative;
+        position: static !important;
     }
     
     .search-wrapper {
         position: relative;
+        z-index: 9999;
     }
     
     .search-input {
@@ -533,15 +561,11 @@ export default{
     
     /* 搜索结果下拉框 */
     .search-results {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        margin-top: 5px;
+        position: fixed;
         background-color: #fff;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        z-index: 99999;
         max-height: 300px;
         overflow-y: auto;
         min-width: 250px;
