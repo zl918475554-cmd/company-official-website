@@ -270,7 +270,7 @@ export default {
     /* 波纹动画效果 - 水面波纹扭曲 */
     .ripple-effect {
         position: relative;
-        overflow: hidden;
+        overflow: visible !important;
         isolation: isolate;
     }
     
@@ -279,20 +279,21 @@ export default {
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 0;
-        height: 0;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%) scale(0);
         pointer-events: none;
-        border: 2px solid rgba(255, 255, 255, 0.9);
+        border: 3px solid rgba(255, 255, 255, 0.95);
         box-shadow: 
             0 0 0 0 rgba(255, 255, 255, 0),
             0 0 0 0 rgba(64, 158, 255, 0),
             0 0 0 0 rgba(255, 255, 255, 0),
             0 0 0 0 rgba(64, 158, 255, 0),
-            inset 0 0 20px rgba(255, 255, 255, 0);
-        animation: waterRippleMultiRingDark 1.5s ease-out forwards;
-        z-index: 10;
+            0 0 20px rgba(255, 255, 255, 0.4),
+            inset 0 0 30px rgba(255, 255, 255, 0.2);
+        animation: waterRippleExpandDark 1.5s ease-out forwards;
+        z-index: 9999;
     }
     
     .ripple-effect::after {
@@ -300,89 +301,93 @@ export default {
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 0;
-        height: 0;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%) scale(0);
         pointer-events: none;
-        background: radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.2) 0%,
-            rgba(255, 255, 255, 0.08) 30%,
-            transparent 60%
-        );
-        animation: waterRippleGlowDark 1.5s ease-out forwards;
-        animation-delay: 0.1s;
-        z-index: 9;
+        border: 2px solid rgba(64, 158, 255, 0.7);
+        box-shadow: 
+            0 0 0 0 rgba(64, 158, 255, 0),
+            0 0 0 0 rgba(255, 255, 255, 0),
+            0 0 15px rgba(64, 158, 255, 0.2);
+        animation: waterRippleExpandDark 1.5s ease-out forwards;
+        animation-delay: 0.2s;
+        z-index: 9998;
     }
     
-    @keyframes waterRippleMultiRingDark {
+    @keyframes waterRippleExpandDark {
         0% {
-            width: 0;
-            height: 0;
+            transform: translate(-50%, -50%) scale(0);
             opacity: 1;
             box-shadow: 
-                0 0 0 0 rgba(255, 255, 255, 0.9),
+                0 0 0 0 rgba(255, 255, 255, 0.95),
                 0 0 0 0 rgba(64, 158, 255, 0),
                 0 0 0 0 rgba(255, 255, 255, 0),
                 0 0 0 0 rgba(64, 158, 255, 0),
-                inset 0 0 20px rgba(255, 255, 255, 0.3);
+                0 0 20px rgba(255, 255, 255, 0.5),
+                inset 0 0 30px rgba(255, 255, 255, 0.25);
             filter: blur(0px);
         }
-        15% {
-            opacity: 0.95;
-            box-shadow: 
-                0 0 0 40px rgba(255, 255, 255, 0.7),
-                0 0 0 0 rgba(64, 158, 255, 0),
-                0 0 0 0 rgba(255, 255, 255, 0),
-                0 0 0 0 rgba(64, 158, 255, 0),
-                inset 0 0 20px rgba(255, 255, 255, 0.25);
-        }
-        30% {
+        20% {
+            transform: translate(-50%, -50%) scale(3);
             opacity: 0.9;
             box-shadow: 
-                0 0 0 70px rgba(255, 255, 255, 0.6),
-                0 0 0 50px rgba(64, 158, 255, 0.5),
+                0 0 0 30px rgba(255, 255, 255, 0.8),
+                0 0 0 0 rgba(64, 158, 255, 0),
                 0 0 0 0 rgba(255, 255, 255, 0),
                 0 0 0 0 rgba(64, 158, 255, 0),
-                inset 0 0 20px rgba(255, 255, 255, 0.2);
+                0 0 25px rgba(255, 255, 255, 0.45),
+                inset 0 0 25px rgba(255, 255, 255, 0.2);
             filter: blur(0.5px);
         }
-        45% {
+        40% {
+            transform: translate(-50%, -50%) scale(8);
             opacity: 0.8;
             box-shadow: 
-                0 0 0 100px rgba(255, 255, 255, 0.5),
-                0 0 0 80px rgba(64, 158, 255, 0.4),
-                0 0 0 60px rgba(255, 255, 255, 0.35),
+                0 0 0 60px rgba(255, 255, 255, 0.65),
+                0 0 0 40px rgba(64, 158, 255, 0.55),
+                0 0 0 0 rgba(255, 255, 255, 0),
                 0 0 0 0 rgba(64, 158, 255, 0),
+                0 0 30px rgba(255, 255, 255, 0.4),
                 inset 0 0 20px rgba(255, 255, 255, 0.15);
             filter: blur(1px);
         }
         60% {
+            transform: translate(-50%, -50%) scale(15);
             opacity: 0.6;
             box-shadow: 
-                0 0 0 130px rgba(255, 255, 255, 0.35),
-                0 0 0 110px rgba(64, 158, 255, 0.3),
-                0 0 0 90px rgba(255, 255, 255, 0.25),
-                0 0 0 70px rgba(64, 158, 255, 0.2),
-                inset 0 0 20px rgba(255, 255, 255, 0.1);
+                0 0 0 90px rgba(255, 255, 255, 0.45),
+                0 0 0 70px rgba(64, 158, 255, 0.4),
+                0 0 0 50px rgba(255, 255, 255, 0.35),
+                0 0 0 0 rgba(64, 158, 255, 0),
+                0 0 25px rgba(255, 255, 255, 0.3),
+                inset 0 0 15px rgba(255, 255, 255, 0.1);
             filter: blur(2px);
         }
-        75% {
+        80% {
+            transform: translate(-50%, -50%) scale(22);
             opacity: 0.4;
+            box-shadow: 
+                0 0 0 120px rgba(255, 255, 255, 0.3),
+                0 0 0 100px rgba(64, 158, 255, 0.25),
+                0 0 0 80px rgba(255, 255, 255, 0.2),
+                0 0 0 60px rgba(64, 158, 255, 0.15),
+                0 0 20px rgba(255, 255, 255, 0.2),
+                inset 0 0 10px rgba(255, 255, 255, 0.05);
             filter: blur(3px);
         }
         100% {
-            width: 300px;
-            height: 300px;
+            transform: translate(-50%, -50%) scale(30);
             opacity: 0;
             box-shadow: 
-                0 0 0 170px rgba(255, 255, 255, 0),
-                0 0 0 150px rgba(64, 158, 255, 0),
-                0 0 0 130px rgba(255, 255, 255, 0),
-                0 0 0 110px rgba(64, 158, 255, 0),
-                inset 0 0 20px rgba(255, 255, 255, 0);
-            filter: blur(4px);
+                0 0 0 150px rgba(255, 255, 255, 0),
+                0 0 0 130px rgba(64, 158, 255, 0),
+                0 0 0 110px rgba(255, 255, 255, 0),
+                0 0 0 90px rgba(64, 158, 255, 0),
+                0 0 0 rgba(255, 255, 255, 0),
+                inset 0 0 0 rgba(255, 255, 255, 0);
+            filter: blur(5px);
         }
     }
     
