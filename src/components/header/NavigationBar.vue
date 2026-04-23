@@ -247,7 +247,6 @@ export default{
             searchResults: [],
             showSearchResults: false,
             highlightedId: null,
-            rippledId: null,
             searchTimeout: null
         }
     },
@@ -256,25 +255,12 @@ export default{
             this.highlightedId = id
         })
         
-        SearchBus.$on('search:rippleTriggered', (id) => {
-            this.rippledId = id
-        })
-        
-        SearchBus.$on('search:rippleEnded', (id) => {
-            if (this.rippledId === id) {
-                this.rippledId = null
-            }
-        })
-        
         SearchBus.$on('search:clearAll', () => {
             this.highlightedId = null
-            this.rippledId = null
         })
     },
     beforeDestroy() {
         SearchBus.$off('search:activeHighlightChanged')
-        SearchBus.$off('search:rippleTriggered')
-        SearchBus.$off('search:rippleEnded')
         SearchBus.$off('search:clearAll')
     },
     computed: {
@@ -327,7 +313,7 @@ export default{
             return this.highlightedId === id
         },
         isRippled(id) {
-            return this.rippledId === id
+            return this.highlightedId === id
         },
         handleSearch() {
             if (this.searchTimeout) {
@@ -388,13 +374,11 @@ export default{
         hoverSearchResult(item) {
             if (this.highlightedId !== item.id) {
                 SearchState.setActiveHighlightId(item.id)
-                SearchState.triggerRippleEffect(item.id)
             }
         },
         navigateToResult(item) {
             const route = SearchState.navigateToMatchedItem(item)
             if (route) {
-                SearchState.triggerRippleEffect(item.id)
                 this.$router.push(route).catch(() => {})
             }
         }
@@ -649,7 +633,7 @@ export default{
     /* 水面波纹扭曲效果 */
     .ripple-effect {
         position: relative;
-        overflow: visible !important;
+        overflow: hidden;
         isolation: isolate;
     }
     
@@ -669,9 +653,9 @@ export default{
             0 0 0 0 rgba(103, 194, 58, 0),
             0 0 0 0 rgba(64, 158, 255, 0),
             0 0 0 0 rgba(103, 194, 58, 0),
-            0 0 20px rgba(64, 158, 255, 0.3),
-            inset 0 0 30px rgba(255, 255, 255, 0.2);
-        animation: waterRippleExpand 1.5s ease-out forwards;
+            0 0 15px rgba(64, 158, 255, 0.4),
+            inset 0 0 20px rgba(255, 255, 255, 0.3);
+        animation: waterRippleExpand 2s ease-in-out infinite;
         z-index: 9999;
     }
     
@@ -685,203 +669,166 @@ export default{
         border-radius: 50%;
         transform: translate(-50%, -50%) scale(0);
         pointer-events: none;
-        border: 2px solid rgba(103, 194, 58, 0.7);
+        border: 2px solid rgba(103, 194, 58, 0.8);
         box-shadow: 
             0 0 0 0 rgba(103, 194, 58, 0),
             0 0 0 0 rgba(64, 158, 255, 0),
-            0 0 15px rgba(103, 194, 58, 0.2);
-        animation: waterRippleExpand 1.5s ease-out forwards;
-        animation-delay: 0.2s;
+            0 0 10px rgba(103, 194, 58, 0.3);
+        animation: waterRippleExpand 2s ease-in-out infinite;
+        animation-delay: 0.6s;
         z-index: 9998;
     }
     
     @keyframes waterRippleExpand {
         0% {
             transform: translate(-50%, -50%) scale(0);
-            opacity: 1;
+            opacity: 0;
             box-shadow: 
-                0 0 0 0 rgba(64, 158, 255, 0.9),
+                0 0 0 0 rgba(64, 158, 255, 0),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                0 0 0 0 rgba(64, 158, 255, 0),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                0 0 15px rgba(64, 158, 255, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.4);
+            filter: blur(0px);
+        }
+        10% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        25% {
+            transform: translate(-50%, -50%) scale(2.5);
+            opacity: 0.9;
+            box-shadow: 
+                0 0 0 15px rgba(64, 158, 255, 0.7),
                 0 0 0 0 rgba(103, 194, 58, 0),
                 0 0 0 0 rgba(64, 158, 255, 0),
                 0 0 0 0 rgba(103, 194, 58, 0),
                 0 0 20px rgba(64, 158, 255, 0.4),
-                inset 0 0 30px rgba(255, 255, 255, 0.3);
-            filter: blur(0px);
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+            filter: blur(0.3px);
         }
-        20% {
-            transform: translate(-50%, -50%) scale(3);
-            opacity: 0.9;
+        50% {
+            transform: translate(-50%, -50%) scale(5);
+            opacity: 0.7;
             box-shadow: 
-                0 0 0 30px rgba(64, 158, 255, 0.7),
-                0 0 0 0 rgba(103, 194, 58, 0),
+                0 0 0 30px rgba(64, 158, 255, 0.5),
+                0 0 0 20px rgba(103, 194, 58, 0.4),
                 0 0 0 0 rgba(64, 158, 255, 0),
                 0 0 0 0 rgba(103, 194, 58, 0),
-                0 0 25px rgba(64, 158, 255, 0.35),
-                inset 0 0 25px rgba(255, 255, 255, 0.25);
-            filter: blur(0.5px);
-        }
-        40% {
-            transform: translate(-50%, -50%) scale(8);
-            opacity: 0.8;
-            box-shadow: 
-                0 0 0 60px rgba(64, 158, 255, 0.6),
-                0 0 0 40px rgba(103, 194, 58, 0.5),
-                0 0 0 0 rgba(64, 158, 255, 0),
-                0 0 0 0 rgba(103, 194, 58, 0),
-                0 0 30px rgba(64, 158, 255, 0.3),
-                inset 0 0 20px rgba(255, 255, 255, 0.2);
+                0 0 18px rgba(64, 158, 255, 0.3),
+                inset 0 0 15px rgba(255, 255, 255, 0.2);
             filter: blur(1px);
         }
-        60% {
-            transform: translate(-50%, -50%) scale(15);
-            opacity: 0.6;
-            box-shadow: 
-                0 0 0 90px rgba(64, 158, 255, 0.4),
-                0 0 0 70px rgba(103, 194, 58, 0.35),
-                0 0 0 50px rgba(64, 158, 255, 0.3),
-                0 0 0 0 rgba(103, 194, 58, 0),
-                0 0 25px rgba(64, 158, 255, 0.25),
-                inset 0 0 15px rgba(255, 255, 255, 0.15);
-            filter: blur(2px);
-        }
-        80% {
-            transform: translate(-50%, -50%) scale(22);
+        75% {
+            transform: translate(-50%, -50%) scale(7);
             opacity: 0.4;
             box-shadow: 
-                0 0 0 120px rgba(64, 158, 255, 0.25),
-                0 0 0 100px rgba(103, 194, 58, 0.2),
-                0 0 0 80px rgba(64, 158, 255, 0.15),
-                0 0 0 60px rgba(103, 194, 58, 0.1),
-                0 0 20px rgba(64, 158, 255, 0.15),
+                0 0 0 45px rgba(64, 158, 255, 0.3),
+                0 0 0 35px rgba(103, 194, 58, 0.25),
+                0 0 0 25px rgba(64, 158, 255, 0.2),
+                0 0 0 0 rgba(103, 194, 58, 0),
+                0 0 12px rgba(64, 158, 255, 0.2),
                 inset 0 0 10px rgba(255, 255, 255, 0.1);
+            filter: blur(2px);
+        }
+        90% {
+            opacity: 0.2;
             filter: blur(3px);
         }
         100% {
-            transform: translate(-50%, -50%) scale(30);
+            transform: translate(-50%, -50%) scale(9);
             opacity: 0;
             box-shadow: 
-                0 0 0 150px rgba(64, 158, 255, 0),
-                0 0 0 130px rgba(103, 194, 58, 0),
-                0 0 0 110px rgba(64, 158, 255, 0),
-                0 0 0 90px rgba(103, 194, 58, 0),
+                0 0 0 60px rgba(64, 158, 255, 0),
+                0 0 0 50px rgba(103, 194, 58, 0),
+                0 0 0 40px rgba(64, 158, 255, 0),
+                0 0 0 30px rgba(103, 194, 58, 0),
                 0 0 0 rgba(64, 158, 255, 0),
                 inset 0 0 0 rgba(255, 255, 255, 0);
-            filter: blur(5px);
+            filter: blur(4px);
         }
     }
     
     .ripple-effect {
-        animation: waterSurfaceDistortion 1.5s ease-out;
+        animation: waterSurfaceDistortion 2s ease-in-out infinite;
     }
     
     @keyframes waterSurfaceDistortion {
-        0% {
+        0%, 100% {
             text-shadow: 
                 0 0 0 rgba(64, 158, 255, 0),
                 0 0 0 rgba(103, 194, 58, 0);
             transform: translate(0, 0) skewX(0deg) skewY(0deg);
             filter: brightness(1) contrast(1);
         }
-        10% {
+        15% {
             text-shadow: 
-                1px 0 3px rgba(64, 158, 255, 0.6),
-                -1px 0 2px rgba(103, 194, 58, 0.4),
-                0 1px 2px rgba(255, 255, 255, 0.3);
-            transform: translate(0.5px, -0.5px) skewX(0.3deg) skewY(0.2deg);
-            filter: brightness(1.05) contrast(1.02);
-        }
-        20% {
-            text-shadow: 
-                -1px 0 4px rgba(64, 158, 255, 0.5),
-                1px 0 3px rgba(103, 194, 58, 0.45),
-                0 -1px 2px rgba(255, 255, 255, 0.25);
-            transform: translate(-0.5px, 0.5px) skewX(-0.3deg) skewY(-0.2deg);
-            filter: brightness(1.08) contrast(1.04);
+                1px 0 2px rgba(64, 158, 255, 0.5),
+                -1px 0 1.5px rgba(103, 194, 58, 0.3),
+                0 1px 1px rgba(255, 255, 255, 0.2);
+            transform: translate(0.3px, -0.3px) skewX(0.2deg) skewY(0.15deg);
+            filter: brightness(1.04) contrast(1.01);
         }
         30% {
             text-shadow: 
-                0.5px 0 3px rgba(64, 158, 255, 0.4),
-                -0.5px 0 2px rgba(103, 194, 58, 0.35),
-                0 0.5px 1px rgba(255, 255, 255, 0.2);
-            transform: translate(0.3px, -0.3px) skewX(0.2deg) skewY(0.15deg);
-            filter: brightness(1.1) contrast(1.05);
-        }
-        40% {
-            text-shadow: 
-                -0.5px 0 2px rgba(64, 158, 255, 0.35),
-                0.5px 0 1.5px rgba(103, 194, 58, 0.3),
-                0 -0.5px 1px rgba(255, 255, 255, 0.15);
+                -1px 0 3px rgba(64, 158, 255, 0.4),
+                1px 0 2px rgba(103, 194, 58, 0.35),
+                0 -1px 1.5px rgba(255, 255, 255, 0.15);
             transform: translate(-0.3px, 0.3px) skewX(-0.2deg) skewY(-0.15deg);
-            filter: brightness(1.12) contrast(1.06);
+            filter: brightness(1.06) contrast(1.02);
         }
-        50% {
+        45% {
             text-shadow: 
-                0.3px 0 2px rgba(64, 158, 255, 0.3),
-                -0.3px 0 1.5px rgba(103, 194, 58, 0.25),
-                0 0.3px 0.8px rgba(255, 255, 255, 0.12);
+                0.5px 0 2px rgba(64, 158, 255, 0.3),
+                -0.5px 0 1.5px rgba(103, 194, 58, 0.25),
+                0 0.5px 0.8px rgba(255, 255, 255, 0.12);
             transform: translate(0.2px, -0.2px) skewX(0.15deg) skewY(0.1deg);
-            filter: brightness(1.1) contrast(1.05);
+            filter: brightness(1.07) contrast(1.03);
         }
         60% {
             text-shadow: 
-                -0.3px 0 1.5px rgba(64, 158, 255, 0.25),
-                0.3px 0 1px rgba(103, 194, 58, 0.2),
-                0 -0.3px 0.5px rgba(255, 255, 255, 0.1);
+                -0.5px 0 1.5px rgba(64, 158, 255, 0.25),
+                0.5px 0 1px rgba(103, 194, 58, 0.2),
+                0 -0.5px 0.5px rgba(255, 255, 255, 0.08);
             transform: translate(-0.2px, 0.2px) skewX(-0.15deg) skewY(-0.1deg);
-            filter: brightness(1.08) contrast(1.04);
-        }
-        70% {
-            text-shadow: 
-                0.2px 0 1px rgba(64, 158, 255, 0.2),
-                -0.2px 0 0.8px rgba(103, 194, 58, 0.15),
-                0 0.2px 0.3px rgba(255, 255, 255, 0.08);
-            transform: translate(0.1px, -0.1px) skewX(0.1deg) skewY(0.05deg);
             filter: brightness(1.05) contrast(1.02);
         }
-        80% {
+        75% {
             text-shadow: 
-                -0.1px 0 0.5px rgba(64, 158, 255, 0.1),
-                0.1px 0 0.3px rgba(103, 194, 58, 0.08);
-            transform: translate(0, 0) skewX(0deg) skewY(0deg);
-            filter: brightness(1.02) contrast(1.01);
+                0.3px 0 1px rgba(64, 158, 255, 0.15),
+                -0.3px 0 0.8px rgba(103, 194, 58, 0.12),
+                0 0.3px 0.3px rgba(255, 255, 255, 0.05);
+            transform: translate(0.1px, -0.1px) skewX(0.1deg) skewY(0.05deg);
+            filter: brightness(1.03) contrast(1.01);
         }
-        90% {
+        85% {
             text-shadow: 
-                0 0 0 rgba(64, 158, 255, 0.05),
-                0 0 0 rgba(103, 194, 58, 0.05);
+                0 0 0 rgba(64, 158, 255, 0.1),
+                0 0 0 rgba(103, 194, 58, 0.1);
             transform: translate(0, 0) skewX(0deg) skewY(0deg);
-            filter: brightness(1.01) contrast(1);
-        }
-        100% {
-            text-shadow: 
-                0 0 0 rgba(64, 158, 255, 0),
-                0 0 0 rgba(103, 194, 58, 0);
-            transform: translate(0, 0) skewX(0deg) skewY(0deg);
-            filter: brightness(1) contrast(1);
+            filter: brightness(1.02) contrast(1);
         }
     }
     
     .ripple-effect .hue,
     .ripple-effect span,
     .ripple-effect div {
-        animation: waterWaveShimmer 1.5s ease-out;
+        animation: waterWaveShimmer 2s ease-in-out infinite;
     }
     
     @keyframes waterWaveShimmer {
-        0% {
+        0%, 100% {
             filter: brightness(1) saturate(1);
         }
         25% {
-            filter: brightness(1.15) saturate(1.1);
+            filter: brightness(1.08) saturate(1.05);
         }
         50% {
-            filter: brightness(1.2) saturate(1.15);
+            filter: brightness(1.12) saturate(1.08);
         }
         75% {
-            filter: brightness(1.1) saturate(1.05);
-        }
-        100% {
-            filter: brightness(1) saturate(1);
+            filter: brightness(1.06) saturate(1.03);
         }
     }
     
